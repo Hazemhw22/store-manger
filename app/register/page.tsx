@@ -220,7 +220,7 @@ export default function RegisterPage() {
             {/* AI Badge */}
             <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
               <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
-                <span className="text-2xl font-bold">AI</span>
+                <span className="text-2xl font-bold">HELLO </span>
                 <div className="w-6 h-6 bg-white/30 rounded-full"></div>
               </div>
             </div>
