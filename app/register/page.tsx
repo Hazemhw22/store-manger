@@ -81,15 +81,22 @@ export default function RegisterPage() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <div className="w-4 h-4 bg-white rounded-full"></div>
               </div>
-              <span className="text-xl font-bold text-gray-900">Store Manager</span>
+              <span className="text-xl font-bold text-gray-900">
+                Store Manager
+              </span>
             </div>
 
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Get started</h1>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                Get started
+              </h1>
               <p className="text-gray-500">
                 Already have an account?{" "}
-                <Link href="/login" className="text-blue-600 font-medium hover:underline">
+                <Link
+                  href="/login"
+                  className="text-blue-600 font-medium hover:underline"
+                >
                   Sign in
                 </Link>
               </p>
@@ -98,18 +105,28 @@ export default function RegisterPage() {
             {/* Questions section */}
             <div className="flex items-center gap-3 mb-8">
               <span className="text-gray-500 text-sm">Questions?</span>
-              <div className="flex items-center gap-2">
+              <a
+                href="https://wa.me/972507795580"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2"
+              >
                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                   <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
                 </div>
-                <span className="text-blue-600 text-sm font-medium">Ask Support</span>
-              </div>
+                <span className="text-blue-600 text-sm font-medium">
+                  Ask Hazem
+                </span>
+              </a>
             </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="storeName" className="text-sm font-medium text-gray-700 mb-2 block">
+                <Label
+                  htmlFor="storeName"
+                  className="text-sm font-medium text-gray-700 mb-2 block"
+                >
                   Store Name
                 </Label>
                 <div className="relative">
@@ -118,7 +135,9 @@ export default function RegisterPage() {
                     type="text"
                     required
                     value={formData.storeName}
-                    onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, storeName: e.target.value })
+                    }
                     placeholder="Enter your store name"
                     className="h-12 pl-10 bg-gray-50 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   />
@@ -127,7 +146,10 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 block">
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-medium text-gray-700 mb-2 block"
+                >
                   Email
                 </Label>
                 <div className="relative">
@@ -136,7 +158,9 @@ export default function RegisterPage() {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     placeholder="Enter your email"
                     className="h-12 pl-10 bg-gray-50 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   />
@@ -145,7 +169,10 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-2 block">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700 mb-2 block"
+                >
                   Password
                 </Label>
                 <div className="relative">
@@ -154,7 +181,9 @@ export default function RegisterPage() {
                     type={showPassword ? "text" : "password"}
                     required
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
                     placeholder="Enter your password"
                     className="h-12 pl-10 pr-10 bg-gray-50 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   />
@@ -166,13 +195,20 @@ export default function RegisterPage() {
                     className="absolute right-0 top-0 h-12 w-12 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 mb-2 block">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-sm font-medium text-gray-700 mb-2 block"
+                >
                   Confirm Password
                 </Label>
                 <div className="relative">
@@ -181,7 +217,12 @@ export default function RegisterPage() {
                     type={showConfirmPassword ? "text" : "password"}
                     required
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
                     placeholder="Confirm your password"
                     className="h-12 pl-10 pr-10 bg-gray-50 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   />
@@ -193,7 +234,11 @@ export default function RegisterPage() {
                     className="absolute right-0 top-0 h-12 w-12 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -231,7 +276,9 @@ export default function RegisterPage() {
               <div className="relative mb-8">
                 <div className="w-32 h-32 bg-green-400 rounded-full mx-auto relative">
                   <div className="absolute inset-4 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">store manager</span>
+                    <span className="text-xs font-bold text-white">
+                      store manager
+                    </span>
                   </div>
                   {/* Rockets */}
                   <div className="absolute -top-4 -left-8 w-16 h-8 bg-gray-200 rounded-full transform -rotate-45"></div>
@@ -239,7 +286,9 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <h2 className="text-3xl font-bold mb-4">Have your own store management</h2>
+              <h2 className="text-3xl font-bold mb-4">
+                Have your own store management
+              </h2>
 
               {/* Dots indicator */}
               <div className="flex justify-center gap-2 mt-8">
@@ -262,5 +311,5 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

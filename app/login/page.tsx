@@ -68,15 +68,22 @@ export default function LoginPage() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <div className="w-4 h-4 bg-white rounded-full"></div>
               </div>
-              <span className="text-xl font-bold text-gray-900">Store Manager</span>
+              <span className="text-xl font-bold text-gray-900">
+                Store Manager
+              </span>
             </div>
 
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome back</h1>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                Welcome back
+              </h1>
               <p className="text-gray-500">
                 Don't have an account?{" "}
-                <Link href="/register" className="text-blue-600 font-medium hover:underline">
+                <Link
+                  href="/register"
+                  className="text-blue-600 font-medium hover:underline"
+                >
                   Sign up
                 </Link>
               </p>
@@ -85,18 +92,28 @@ export default function LoginPage() {
             {/* Questions section */}
             <div className="flex items-center gap-3 mb-8">
               <span className="text-gray-500 text-sm">Questions?</span>
-              <div className="flex items-center gap-2">
+              <a
+                href="https://wa.me/972507795580"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2"
+              >
                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                   <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
                 </div>
-                <span className="text-blue-600 text-sm font-medium">Ask Support</span>
-              </div>
+                <span className="text-blue-600 text-sm font-medium">
+                  Ask Hazem
+                </span>
+              </a>
             </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 block">
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-medium text-gray-700 mb-2 block"
+                >
                   Email
                 </Label>
                 <div className="relative">
@@ -105,7 +122,9 @@ export default function LoginPage() {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     placeholder="Enter your email"
                     className="h-12 pl-10 bg-gray-50 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   />
@@ -114,7 +133,10 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-2 block">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700 mb-2 block"
+                >
                   Password
                 </Label>
                 <div className="relative">
@@ -123,7 +145,9 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     required
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
                     placeholder="Enter your password"
                     className="h-12 pl-10 pr-10 bg-gray-50 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   />
@@ -135,7 +159,11 @@ export default function LoginPage() {
                     className="absolute right-0 top-0 h-12 w-12 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -173,7 +201,9 @@ export default function LoginPage() {
               <div className="relative mb-8">
                 <div className="w-32 h-32 bg-green-400 rounded-full mx-auto relative">
                   <div className="absolute inset-4 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">store manager</span>
+                    <span className="text-xs font-bold text-white">
+                      store manager
+                    </span>
                   </div>
                   {/* Rockets */}
                   <div className="absolute -top-4 -left-8 w-16 h-8 bg-gray-200 rounded-full transform -rotate-45"></div>
@@ -181,7 +211,9 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <h2 className="text-3xl font-bold mb-4">Welcome to your store management</h2>
+              <h2 className="text-3xl font-bold mb-4">
+                Welcome to your store management
+              </h2>
 
               {/* Dots indicator */}
               <div className="flex justify-center gap-2 mt-8">
@@ -204,5 +236,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
