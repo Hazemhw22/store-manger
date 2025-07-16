@@ -42,16 +42,19 @@ export default function RegisterPage() {
 
       if (authError) throw authError
 
-      // Create store record
+      // Automatically create store for store users
+      const userId = authData.user?.id;
+      if (!userId) throw new Error("User ID not found after registration");
       const { error: storeError } = await supabase.from("stores").insert([
         {
           name: formData.storeName,
-          email: formData.email,
-          password_hash: "handled_by_supabase_auth",
+          owner_user_id: userId,
+          subscription_status: "active",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
-      ])
-
-      if (storeError) throw storeError
+      ]);
+      if (storeError) throw storeError;
 
       toast.success("Account created successfully")
       router.push("/login")

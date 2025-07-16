@@ -12,15 +12,20 @@ import { supabase } from "@/lib/supabase"
 import type { Store } from "@/lib/types"
 import { toast } from "sonner"
 import { LoadingSpinner } from "@/components/loading-spinner"
+import Image from "next/image";
+import { LogOut, Calendar, Phone, MapPin, User, BadgeCheck, Image as ImageIcon } from "lucide-react";
 
 export default function SettingsPage() {
   const [store, setStore] = useState<Store | null>(null)
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
-  })
+    phone: "",
+    address: "",
+  });
   const [isLoading, setIsLoading] = useState(false)
   const [isPageLoading, setIsPageLoading] = useState(true)
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string>("");
 
   useEffect(() => {
     fetchStoreData()
@@ -31,50 +36,99 @@ export default function SettingsPage() {
     try {
       const {
         data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) return
+      } = await supabase.auth.getUser();
+      if (!user) return;
 
-      const { data, error } = await supabase.from("stores").select("*").eq("email", user.email).single()
+      const { data, error } = await supabase
+        .from("stores")
+        .select("*")
+        .eq("owner_user_id", user.id)
+        .single();
 
-      if (error) throw error
+      if (error) throw error;
 
-      setStore(data)
+      setStore(data);
       setFormData({
-        name: data.name,
-        email: data.email,
-      })
+        name: data.name || "",
+        phone: data.phone || "",
+        address: data.address || "",
+      });
+      setLogoUrl(data.logo_url || "");
     } catch (error) {
-      console.error("Error fetching store data:", error)
-      toast.error("Error loading store data")
+      console.error("Error fetching store data:", error);
+      toast.error("Error loading store data");
     }
-  }
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setLogoFile(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        if (ev.target?.result) setLogoUrl(ev.target.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleUpdateStore = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!store) return
+    e.preventDefault();
+    if (!store) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
+      let uploadedLogoUrl = logoUrl;
+      if (logoFile) {
+        const fileExt = logoFile.name.split(".").pop();
+        const filePath = `${store.id}.${fileExt}`; // No leading slash
+        const { error: uploadError } = await supabase.storage
+          .from("store-logos")
+          .upload(filePath, logoFile, { upsert: true });
+        if (uploadError) {
+          console.error("Logo upload error:", uploadError);
+          toast.error("Error uploading logo. Please try again.");
+          throw uploadError;
+        }
+        const { data: publicUrlData } = supabase.storage
+          .from("store-logos")
+          .getPublicUrl(filePath);
+        uploadedLogoUrl = publicUrlData.publicUrl;
+        console.log("Logo uploaded:", filePath, uploadedLogoUrl);
+      }
+      if (!uploadedLogoUrl) {
+        uploadedLogoUrl = "/store-bag.png";
+      }
+      // Debug log for update
+      console.log("Updating store with id:", store.id, "Data:", {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+        logo_url: uploadedLogoUrl,
+        updated_at: new Date().toISOString(),
+      });
       const { error } = await supabase
         .from("stores")
         .update({
-          name: formData.name,
-          email: formData.email,
+          name: formData.name || "",
+          phone: formData.phone || "",
+          address: formData.address || "",
+          logo_url: uploadedLogoUrl,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", store.id)
+        .eq("id", store.id);
 
-      if (error) throw error
+      if (error) throw error;
 
-      toast.success("Store information updated successfully")
+      toast.success("Store information updated successfully");
     } catch (error: any) {
-      console.error("Error updating store:", error)
-      toast.error(error.message || "Error updating store information")
+      console.error("Error updating store:", error);
+      toast.error(error.message || "Error updating store information");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleLogout = async () => {
     try {
@@ -93,54 +147,90 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-gray-600 bg-clip-text text-transparent">
-            Settings
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-lg mt-2">Manage store settings and account</p>
-        </div>
-
-        <div className="grid gap-6">
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950">
-              <CardTitle className="text-blue-800 dark:text-blue-200">Store Information</CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <form onSubmit={handleUpdateStore} className="space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center py-10 px-2">
+      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Left: Profile Info */}
+        <div className="md:col-span-2">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 flex flex-col gap-6">
+            <div className="flex items-center gap-4 mb-4">
+              <User className="h-6 w-6 text-blue-500" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Store Profile</h2>
+            </div>
+            <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
+              {/* Logo Upload */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="relative group">
+                  {store?.logo_url ? (
+                    <Image
+                      src={store.logo_url}
+                      alt="Store Logo"
+                      width={110}
+                      height={110}
+                      className="rounded-full border-4 border-blue-200 dark:border-blue-700 shadow-lg object-cover bg-white"
+                    />
+                  ) : (
+                    <div className="w-[110px] h-[110px] rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-5xl border-4 border-blue-100 dark:border-blue-700 shadow-lg">
+                      <ImageIcon className="w-10 h-10" />
+                    </div>
+                  )}
+                  <label className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 cursor-pointer shadow transition-all">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoChange}
+                      className="hidden"
+                    />
+                    <span className="text-xs font-semibold">Edit</span>
+                  </label>
+                </div>
+                <span className="text-xs text-gray-500 mt-1">JPG, PNG or GIF. Max 2MB.</span>
+              </div>
+              {/* Editable Fields */}
+              <form onSubmit={handleUpdateStore} className="flex-1 w-full flex flex-col gap-4">
                 <div>
-                  <Label htmlFor="storeName" className="text-sm font-semibold text-gray-700">
-                    Store Name
+                  <Label htmlFor="storeName" className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                    <BadgeCheck className="h-4 w-4 text-blue-400" /> Store Name
                   </Label>
                   <Input
                     id="storeName"
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value || "" })}
                     placeholder="Enter store name"
-                    className="h-12 bg-gray-50 border-0 focus:ring-2 focus:ring-blue-500/20"
+                    className="h-12 bg-gray-50 dark:bg-gray-700 border-0 focus:ring-2 focus:ring-blue-500/20 mt-1"
+                    required
                   />
                 </div>
-
                 <div>
-                  <Label htmlFor="storeEmail" className="text-sm font-semibold text-gray-700">
-                    Email Address
+                  <Label htmlFor="storePhone" className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-blue-400" /> Phone Number
                   </Label>
                   <Input
-                    id="storeEmail"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="Enter email address"
-                    className="h-12 bg-gray-50 border-0 focus:ring-2 focus:ring-blue-500/20"
+                    id="storePhone"
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value || "" })}
+                    placeholder="Enter phone number"
+                    className="h-12 bg-gray-50 dark:bg-gray-700 border-0 focus:ring-2 focus:ring-blue-500/20 mt-1"
                   />
                 </div>
-
+                <div>
+                  <Label htmlFor="storeAddress" className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-blue-400" /> Address
+                  </Label>
+                  <Input
+                    id="storeAddress"
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value || "" })}
+                    placeholder="Enter address"
+                    className="h-12 bg-gray-50 dark:bg-gray-700 border-0 focus:ring-2 focus:ring-blue-500/20 mt-1"
+                  />
+                </div>
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 h-12 px-8"
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 h-12 px-8 font-semibold text-lg rounded-lg mt-2"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
@@ -152,66 +242,39 @@ export default function SettingsPage() {
                   )}
                 </Button>
               </form>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
-              <CardTitle className="text-purple-800 dark:text-purple-200">Account Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 p-8">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Change Password</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  To change your password, please use the password reset link
-                </p>
-                <Button variant="outline" className="h-12 hover:bg-purple-50 border-purple-200 bg-transparent">
-                  Send Reset Link
-                </Button>
+            </div>
+          </div>
+        </div>
+        {/* Right: Store Info & Sign Out */}
+        <div className="flex flex-col gap-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 flex flex-col gap-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-5 w-5 text-blue-400" />
+              <span className="font-semibold text-gray-700 dark:text-gray-200">Store Info</span>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">Subscription Status:</span>
+                <span className="font-semibold text-gray-800 dark:text-gray-100">{store?.subscription_status || "-"}</span>
               </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="text-lg font-semibold text-red-600">Danger Zone</h3>
-                <p className="text-sm text-gray-600 mb-4">Log out from your account</p>
-                <Button
-                  onClick={handleLogout}
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-xl hover:shadow-2xl transition-all duration-300 h-12 px-8"
-                >
-                  Log Out
-                </Button>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">Subscription End:</span>
+                <span className="font-semibold text-gray-800 dark:text-gray-100">{store?.subscription_end || "-"}</span>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl">
-            <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950">
-              <CardTitle className="text-green-800 dark:text-green-200">Store Statistics</CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-                  <div className="text-2xl font-bold text-blue-600">0</div>
-                  <div className="text-sm text-blue-700 font-medium">Total Customers</div>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-                  <div className="text-2xl font-bold text-green-600">0</div>
-                  <div className="text-sm text-green-700 font-medium">Total Products</div>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
-                  <div className="text-2xl font-bold text-purple-600">0</div>
-                  <div className="text-sm text-purple-700 font-medium">Total Invoices</div>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
-                  <div className="text-2xl font-bold text-orange-600">₪0</div>
-                  <div className="text-sm text-orange-700 font-medium">Total Sales</div>
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">Created At:</span>
+                <span className="font-semibold text-gray-800 dark:text-gray-100">{store?.created_at ? new Date(store.created_at).toLocaleDateString() : "-"}</span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+          <Button
+            onClick={handleLogout}
+            className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl transition-all duration-300 h-12 px-8 font-semibold text-lg rounded-lg flex items-center gap-2 justify-center"
+          >
+            <LogOut className="h-5 w-5" /> Sign Out
+          </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }

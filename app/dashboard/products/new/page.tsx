@@ -52,8 +52,8 @@ export default function NewProductPage() {
 
       const { data: store } = await supabase
         .from("stores")
-        .select("id")
-        .eq("email", user.email)
+        .select("*")
+        .eq("owner_user_id", user.id)
         .single();
       if (!store) throw new Error("Store not found");
 

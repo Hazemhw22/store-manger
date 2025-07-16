@@ -6,7 +6,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import type { SupabaseClient } from "@supabase/supabase-js"
 
 type SupabaseContext = {
-  supabase: SupabaseClient
+  supabase: SupabaseClient<any, any, any, any>
 }
 
 const Context = createContext<SupabaseContext | undefined>(undefined)

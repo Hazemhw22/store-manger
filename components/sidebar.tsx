@@ -15,11 +15,14 @@ import {
   ShoppingCart,
   BarChart3,
   X,
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navigation = [
+const storeNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "POS", href: "/dashboard/pos", icon: ShoppingCart },
+  { name: "Sales Day", href: "/dashboard/sales-day", icon: DollarSign },
   { name: "Customers", href: "/dashboard/customers", icon: Users },
   { name: "Products", href: "/dashboard/products", icon: Package },
   { name: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
@@ -72,7 +75,7 @@ export function Sidebar({
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2">
-            {navigation.map((item) => {
+            {storeNavigation.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -103,7 +106,7 @@ export function Sidebar({
           {/* Footer */}
           <div className="p-4 border-t border-[#232b3b] dark:border-[#232b3b]">
             <div className="text-xs text-slate-400 text-center dark:text-slate-500">
-              © 2024 Store Manager
+              © 2025 HAZEM HAWAMEDAH
             </div>
           </div>
         </div>

@@ -48,13 +48,25 @@ export function DashboardHeader() {
       const { data, error } = await supabase
         .from("stores")
         .select("*")
-        .eq("email", user.email)
+        .eq("owner_user_id", user.id)
         .single();
 
       if (error) throw error;
+      if (!data) {
+        setStore(null);
+        console.warn("No store found for user", user.id);
+        return;
+      }
       setStore(data);
     } catch (error) {
       console.error("Error fetching store data:", error);
+      // Debug info
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log("Current user id:", user?.id);
+      const { data: stores, error: storesError } = await supabase
+        .from("stores")
+        .select("*");
+      console.log("All stores:", stores, "Query error:", storesError);
     }
   };
 
@@ -109,9 +121,9 @@ export function DashboardHeader() {
         <div className="flex-1 flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <img
-              src="/store-bag.png"
+              src={store?.logo_url || "/store-bag.png"}
               alt="Store Icon"
-              className="w-10 h-10 rounded-xl shadow-md bg-gradient-to-br from-blue-400 to-purple-500 p-1"
+              className="w-10 h-10 rounded-xl shadow-md bg-gradient-to-br from-blue-400 to-purple-500 p-1 object-cover"
             />
             <div>
               <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent dark:from-blue-200 dark:to-purple-200">
@@ -216,7 +228,7 @@ export function DashboardHeader() {
               >
                 <Avatar className="h-10 w-10">
                   <AvatarImage
-                    src="/placeholder-store.jpg"
+                    src={store?.logo_url || "/placeholder-store.jpg"}
                     alt={store?.name || "Store"}
                   />
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-bold">
@@ -234,9 +246,9 @@ export function DashboardHeader() {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1 items-center text-center">
                   <img
-                    src="/store-bag.png"
+                    src={store?.logo_url || "/store-bag.png"}
                     alt="Store Icon"
-                    className="w-12 h-12 rounded-xl shadow bg-gradient-to-br from-blue-400 to-purple-500 p-1 mb-2"
+                    className="w-12 h-12 rounded-xl shadow bg-gradient-to-br from-blue-400 to-purple-500 p-1 mb-2 object-cover"
                   />
                   <p className="text-base font-bold leading-none text-blue-700 dark:text-blue-200">
                     {store?.name || "Store"}

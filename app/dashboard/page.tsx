@@ -57,7 +57,7 @@ export default function DashboardPage() {
       const { data: store } = await supabase
         .from("stores")
         .select("id")
-        .eq("email", user.email)
+        .eq("owner_user_id", user.id)
         .single();
       if (!store) return;
 
@@ -141,7 +141,7 @@ export default function DashboardPage() {
       const { data: store } = await supabase
         .from("stores")
         .select("name")
-        .eq("email", user.email)
+        .eq("owner_user_id", user.id)
         .single();
       setStoreName(store?.name || "My Store");
     } catch {

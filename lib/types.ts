@@ -2,6 +2,11 @@ export interface Store {
   id: string
   name: string
   email: string
+  logo_url?: string
+  phone?: string
+  address?: string
+  subscription_status?: string
+  subscription_end?: string
   created_at: string
   updated_at: string
 }

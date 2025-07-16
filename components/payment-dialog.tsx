@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,6 +33,8 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { createNotification, NotificationTemplates } from "@/lib/notifications";
 import Link from "next/link";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface PaymentDialogProps {
   customerId: string;
@@ -60,6 +62,29 @@ export function PaymentDialog({
     products: "",
     description: "",
   });
+  const [productsList, setProductsList] = useState<{ id: string; name: string }[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: store } = await supabase
+        .from("stores")
+        .select("id")
+        .eq("owner_user_id", user.id)
+        .single();
+      if (!store) return;
+      const { data: products } = await supabase
+        .from("products")
+        .select("id, name")
+        .eq("store_id", store.id);
+      setProductsList(products || []);
+    };
+    fetchProducts();
+  }, []);
 
   const handleSubmit = async () => {
     if (!formData.amount || Number.parseFloat(formData.amount) <= 0) {
@@ -78,7 +103,7 @@ export function PaymentDialog({
       const { data: store } = await supabase
         .from("stores")
         .select("id")
-        .eq("email", user.email)
+        .eq("owner_user_id", user.id)
         .single();
       if (!store) throw new Error("Store not found");
 
@@ -336,58 +361,63 @@ export function PaymentDialog({
             />
           </div>
 
-          {/* Products/Items */}
-          {showProductsList ? (
-            <div className="space-y-2">
-              <Label
-                htmlFor="products"
-                className="text-sm font-semibold text-gray-700 flex items-center gap-2"
-              >
-                <Package className="h-4 w-4" />
-                Products/Items
-              </Label>
-              <Textarea
-                id="products"
-                value={formData.products}
-                onChange={(e) =>
-                  setFormData({ ...formData, products: e.target.value })
-                }
-                placeholder="List the products or services involved (e.g., 2x Laptop, 1x Mouse, Installation service)"
-                rows={3}
-                className="border-gray-200 focus:border-green-500 focus:ring-green-500 resize-none"
-              />
-              <div>
-                <Link href="/dashboard/products/new">
-                  <Button
-                    variant="outline"
-                    className="mt-2 text-blue-700 border-blue-300"
-                  >
-                    + Add New Product
-                  </Button>
-                </Link>
+          {/* Products/Items Multi-Select Dropdown */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="products"
+              className="text-sm font-semibold text-gray-700 flex items-center gap-2"
+            >
+              <Package className="h-4 w-4" />
+              Products/Items
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full h-12 justify-start">
+                  {selectedProductIds.length > 0
+                    ? productsList
+                        .filter((p) => selectedProductIds.includes(p.id))
+                        .map((p) => p.name)
+                        .join(", ")
+                    : "Select products..."}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 max-h-60 overflow-y-auto">
+                {productsList.length === 0 && (
+                  <div className="text-gray-400 text-sm">No products found</div>
+                )}
+                {productsList.map((product) => (
+                  <div key={product.id} className="flex items-center space-x-2 py-1">
+                    <Checkbox
+                      id={`product-${product.id}`}
+                      checked={selectedProductIds.includes(product.id)}
+                      onCheckedChange={(checked) => {
+                        let newIds = [...selectedProductIds];
+                        if (checked) {
+                          newIds.push(product.id);
+                        } else {
+                          newIds = newIds.filter((id) => id !== product.id);
+                        }
+                        setSelectedProductIds(newIds);
+                        const selectedNames = productsList
+                          .filter((p) => newIds.includes(p.id))
+                          .map((p) => p.name)
+                          .join(", ");
+                        setFormData({ ...formData, products: selectedNames });
+                      }}
+                    />
+                    <Label htmlFor={`product-${product.id}`} className="text-gray-700 cursor-pointer">
+                      {product.name}
+                    </Label>
+                  </div>
+                ))}
+              </PopoverContent>
+            </Popover>
+            {formData.products && (
+              <div className="mt-2 text-sm text-gray-600">
+                Selected: {formData.products}
               </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Label
-                htmlFor="products"
-                className="text-sm font-semibold text-gray-700 flex items-center gap-2"
-              >
-                <Package className="h-4 w-4" />
-                Products/Items
-              </Label>
-              <Textarea
-                id="products"
-                value={formData.products}
-                onChange={(e) =>
-                  setFormData({ ...formData, products: e.target.value })
-                }
-                placeholder="List the products or services involved (e.g., 2x Laptop, 1x Mouse, Installation service)"
-                rows={3}
-                className="border-gray-200 focus:border-green-500 focus:ring-green-500 resize-none"
-              />
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Additional Notes */}
           <div className="space-y-2">
